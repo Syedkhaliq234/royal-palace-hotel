@@ -1,0 +1,786 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Royal Palace Hotel — Admin</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --navy: #101a2e;
+    --navy-light: #1b2a45;
+    --gold: #c9a463;
+    --gold-soft: #e4cd9a;
+    --bg: #f7f5f0;
+    --card: #ffffff;
+    --text: #1c2333;
+    --muted: #6b7280;
+    --border: #e5e0d5;
+    --danger: #b3452f;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+  h1, h2, h3 { font-family: 'Playfair Display', serif; }
+
+  /* Login gate */
+  #login-screen {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--navy);
+    background-image: linear-gradient(160deg, var(--navy) 0%, #0a1220 100%);
+  }
+  .login-card {
+    background: var(--card);
+    padding: 48px 40px;
+    border-radius: 8px;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.35);
+    text-align: center;
+  }
+  .login-card .crown { font-size: 28px; color: var(--gold); margin-bottom: 8px; }
+  .login-card h1 { font-size: 22px; margin: 0 0 4px; color: var(--navy); }
+  .login-card p { color: var(--muted); font-size: 14px; margin: 0 0 24px; }
+  .login-card input {
+    width: 100%;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    font-size: 15px;
+    margin-bottom: 14px;
+  }
+  .login-card button {
+    width: 100%;
+    padding: 12px 14px;
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s;
+  }
+  .login-card button:hover { background: var(--navy-light); }
+  #login-error { color: var(--danger); font-size: 13px; margin-top: 10px; display: none; }
+  .login-hint { font-size: 12px; color: var(--muted); margin-top: 18px; }
+  .security-warning {
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: #92620b;
+    background: #fdf0d5;
+    border: 1px solid #eeceA0;
+    border-radius: 6px;
+    padding: 10px 12px;
+    margin-top: 12px;
+    text-align: left;
+  }
+
+  /* App shell */
+  #app { display: none; min-height: 100vh; }
+  header.topbar {
+    background: var(--navy);
+    color: #fff;
+    padding: 18px 32px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  header.topbar .brand { display: flex; align-items: center; gap: 10px; }
+  header.topbar .brand span.crown { color: var(--gold); font-size: 20px; }
+  header.topbar h1 { font-size: 19px; margin: 0; font-weight: 600; }
+  header.topbar a.view-site {
+    color: var(--gold-soft);
+    text-decoration: none;
+    font-size: 13px;
+    border: 1px solid rgba(201,164,99,0.4);
+    padding: 7px 14px;
+    border-radius: 5px;
+    transition: background 0.2s;
+  }
+  header.topbar a.view-site:hover { background: rgba(201,164,99,0.12); }
+  header.topbar button#logout-btn {
+    background: transparent;
+    border: none;
+    color: rgba(255,255,255,0.6);
+    font-size: 13px;
+    cursor: pointer;
+    margin-left: 12px;
+  }
+  header.topbar button#logout-btn:hover { color: #fff; }
+
+  nav.tabs {
+    display: flex;
+    gap: 4px;
+    background: #fff;
+    border-bottom: 1px solid var(--border);
+    padding: 0 32px;
+  }
+  nav.tabs button {
+    padding: 14px 18px;
+    background: none;
+    border: none;
+    border-bottom: 2px solid transparent;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: var(--muted);
+    cursor: pointer;
+  }
+  nav.tabs button.active { color: var(--navy); border-bottom-color: var(--gold); }
+
+  main { padding: 32px; max-width: 1100px; margin: 0 auto; }
+  .panel { display: none; }
+  .panel.active { display: block; }
+
+  .section-title { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 18px; }
+  .section-title h2 { font-size: 24px; margin: 0; color: var(--navy); }
+  .section-title p { font-size: 13px; color: var(--muted); margin: 4px 0 0; }
+  .count-badge {
+    background: var(--gold);
+    color: var(--navy);
+    font-size: 12px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 999px;
+  }
+
+  /* Bookings */
+  .booking-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px 22px;
+    margin-bottom: 14px;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 12px;
+    align-items: start;
+  }
+  .booking-card .name { font-weight: 600; font-size: 16px; }
+  .booking-card .meta { color: var(--muted); font-size: 13px; margin-top: 2px; }
+  .booking-card .details {
+    margin-top: 10px;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 8px 20px;
+    font-size: 13px;
+  }
+  .booking-card .details div span.label { display: block; color: var(--muted); font-size: 11px; text-transform: uppercase; letter-spacing: 0.04em; }
+  .booking-card .note { margin-top: 10px; font-size: 13px; color: var(--text); background: var(--bg); padding: 10px 12px; border-radius: 5px; }
+  .status-pill {
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .status-new { background: #fdf0d5; color: #92620b; }
+  .status-confirmed { background: #dbf0e3; color: #1f7a4c; }
+  .booking-actions { display: flex; flex-direction: column; gap: 8px; align-items: flex-end; }
+  .booking-actions button {
+    font-size: 12px;
+    padding: 6px 12px;
+    border-radius: 5px;
+    border: 1px solid var(--border);
+    background: #fff;
+    cursor: pointer;
+    white-space: nowrap;
+  }
+  .booking-actions button.confirm { border-color: #1f7a4c; color: #1f7a4c; }
+  .booking-actions button.delete { border-color: var(--danger); color: var(--danger); }
+  .empty-state {
+    text-align: center;
+    padding: 60px 20px;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+  }
+
+  /* Content editor */
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .field-group {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 22px;
+    margin-bottom: 20px;
+  }
+  .field-group h3 { font-size: 16px; margin: 0 0 16px; color: var(--navy); }
+  .field { margin-bottom: 14px; }
+  .field label { display: block; font-size: 12px; font-weight: 600; color: var(--muted); text-transform: uppercase; letter-spacing: 0.03em; margin-bottom: 6px; }
+  .field input, .field textarea {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    font-family: 'Inter', sans-serif;
+    font-size: 14px;
+    resize: vertical;
+  }
+  .save-bar {
+    position: sticky;
+    bottom: 0;
+    background: rgba(247,245,240,0.95);
+    backdrop-filter: blur(4px);
+    padding: 16px 0;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    border-top: 1px solid var(--border);
+  }
+  .save-bar button {
+    background: var(--navy);
+    color: #fff;
+    border: none;
+    padding: 12px 26px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+  }
+  .save-bar button:hover { background: var(--navy-light); }
+  .save-msg { font-size: 13px; color: #1f7a4c; opacity: 0; transition: opacity 0.3s; }
+  .save-msg.show { opacity: 1; }
+
+  @media (max-width: 700px) {
+    .form-grid { grid-template-columns: 1fr; }
+    header.topbar { padding: 14px 16px; }
+    main { padding: 20px 16px; }
+    nav.tabs { padding: 0 16px; overflow-x: auto; }
+  }
+</style>
+</head>
+<body>
+
+<div id="login-screen">
+  <div class="login-card">
+    <div class="crown">&#9813;</div>
+    <h1>Royal Palace Hotel</h1>
+    <p>Admin access</p>
+
+    <div id="login-form-fields">
+      <input type="email" id="email-input" placeholder="Admin email" autocomplete="username">
+      <input type="password" id="password-input" placeholder="Admin password" autocomplete="current-password">
+      <button onclick="gaTryLogin()">Sign in</button>
+      <div id="login-error"></div>
+    </div>
+
+    <div id="backend-not-configured" class="security-warning" style="display:none;text-align:left;">
+      ⚠ No backend is configured yet, so there is no login to show. Admin access requires a real server-side login — see <strong>server/README.md</strong> to deploy the backend, then set <strong>HOTEL_API_BASE_URL</strong> near the top of this file's script. There is no password stored in this file to fall back on.
+    </div>
+  </div>
+</div>
+
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="crown">&#9813;</span>
+      <h1>Royal Palace Hotel — Admin</h1>
+    </div>
+    <div>
+      <a class="view-site" href="index.html" target="_blank">View site &#8599;</a>
+      <button id="logout-btn" onclick="gaLogout()">Sign out</button>
+    </div>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab-btn active" data-tab="bookings" onclick="gaSwitchTab('bookings')">Bookings</button>
+    <button class="tab-btn" data-tab="content" onclick="gaSwitchTab('content')">Site Content</button>
+    <button class="tab-btn" data-tab="newsletter" onclick="gaSwitchTab('newsletter')">Newsletter</button>
+  </nav>
+
+  <main>
+    <!-- BOOKINGS PANEL -->
+    <section id="panel-bookings" class="panel active">
+      <div class="section-title">
+        <div>
+          <h2>Reservation Requests</h2>
+          <p>Bookings submitted from <strong>this same browser/device</strong> — see note below</p>
+        </div>
+        <span class="count-badge" id="bookings-count">0</span>
+      </div>
+      <div class="security-warning" style="margin-bottom:16px;">⚠ Bookings are stored in this browser's local storage, not a shared database. A guest booking from their own phone will NOT appear here — you would only see bookings submitted from this exact browser on this exact device. For real cross-device booking capture, this needs a backend + database (similar to the newsletter system), which is not yet built for bookings.</div>
+      <div id="bookings-list"></div>
+    </section>
+
+    <!-- CONTENT PANEL -->
+    <section id="panel-content" class="panel">
+      <div class="section-title">
+        <div>
+          <h2>Site Content</h2>
+          <p>Edit contact details and room pricing shown on the website</p>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h3>Contact Details</h3>
+        <div class="form-grid">
+          <div class="field">
+            <label for="f-phone">Phone Number</label>
+            <input type="text" id="f-phone" placeholder="+92 307 2925650">
+          </div>
+          <div class="field">
+            <label for="f-address">Address</label>
+            <input type="text" id="f-address" placeholder="Lahore, Punjab, Pakistan">
+          </div>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h3>Deluxe Room</h3>
+        <div class="form-grid">
+          <div class="field">
+            <label for="f-deluxe-title">Room Name</label>
+            <input type="text" id="f-deluxe-title" placeholder="Deluxe Room">
+          </div>
+          <div class="field">
+            <label for="f-deluxe-price">Price per Night (USD, number only)</label>
+            <input type="text" id="f-deluxe-price" placeholder="350">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-deluxe-desc">Description</label>
+          <textarea id="f-deluxe-desc" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="field-group">
+        <h3>Presidential Suite</h3>
+        <div class="form-grid">
+          <div class="field">
+            <label for="f-presidential-title">Room Name</label>
+            <input type="text" id="f-presidential-title" placeholder="Presidential Suite">
+          </div>
+          <div class="field">
+            <label for="f-presidential-price">Price per Night (USD, number only)</label>
+            <input type="text" id="f-presidential-price" placeholder="850">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-presidential-desc">Description</label>
+          <textarea id="f-presidential-desc" rows="2"></textarea>
+        </div>
+      </div>
+
+      <div class="save-bar">
+        <button onclick="gaSaveContent()">Save changes</button>
+        <span class="save-msg" id="save-msg">Saved — refresh the site to see updates.</span>
+      </div>
+    </section>
+
+    <!-- NEWSLETTER PANEL -->
+    <section id="panel-newsletter" class="panel">
+      <div class="section-title">
+        <div>
+          <h2>Newsletter Subscribers</h2>
+          <p>Uses the same admin session as Bookings and Site Content — see server/README.md</p>
+        </div>
+        <span class="count-badge" id="newsletter-count">0</span>
+      </div>
+
+      <div class="field-group" style="display:flex;gap:12px;align-items:center;flex-wrap:wrap;">
+        <input type="text" id="nl-search" placeholder="Search by email..." style="flex:1;min-width:200px;padding:10px 12px;border:1px solid var(--border);border-radius:5px;font-size:14px;" oninput="gaSearchSubscribers(this.value)">
+        <button onclick="gaExportSubscribersCsv()" style="background:#fff;border:1px solid var(--border);padding:9px 16px;border-radius:5px;font-size:13px;cursor:pointer;">Export CSV</button>
+      </div>
+      <div id="newsletter-list"></div>
+    </section>
+  </main>
+</div>
+
+<script src="config.js"></script>
+<script>
+  // ============================================================
+  // No password is stored in this file. Admin access requires a real
+  // backend — see server/README.md. There is intentionally no client-side
+  // fallback authentication of any kind.
+  //
+  // HOTEL_API_BASE_URL comes from config.js (loaded via <script src=
+  // "config.js"> above) — the same single config file index.html uses, so
+  // there's only one place to edit for production deployment.
+  // ============================================================
+  var HOTEL_API_BASE_URL = window.HOTEL_API_BASE_URL || "";
+  var gaCsrfToken = null;
+
+  if (!HOTEL_API_BASE_URL) {
+    document.getElementById('login-form-fields').style.display = 'none';
+    document.getElementById('backend-not-configured').style.display = 'block';
+  }
+
+  function gaTryLogin() {
+    if (!HOTEL_API_BASE_URL) return; // defensive: the login button isn't even visible in this state
+
+    var pwInput = document.getElementById('password-input');
+    var emailInput = document.getElementById('email-input');
+    var err = document.getElementById('login-error');
+    err.style.display = 'none';
+
+    // REAL authentication only: bcrypt-verified server-side, session cookie (httpOnly).
+    fetch(HOTEL_API_BASE_URL + '/api/auth/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      credentials: 'include', // required so the session cookie is stored
+      body: JSON.stringify({ email: emailInput.value.trim(), password: pwInput.value })
+    })
+      .then(function(r) { return r.json().then(function(data) { return { ok: r.ok, data: data }; }); })
+      .then(function(result) {
+        if (result.ok && result.data.success) {
+          pwInput.value = '';
+          gaFetchCsrfToken();
+          showApp();
+        } else {
+          err.textContent = (result.data && result.data.error) || 'Login failed.';
+          err.style.display = 'block';
+          pwInput.value = '';
+          pwInput.focus();
+        }
+      })
+      .catch(function() {
+        err.textContent = 'Could not reach the server. Please try again.';
+        err.style.display = 'block';
+      });
+  }
+
+  function gaFetchCsrfToken() {
+    if (!HOTEL_API_BASE_URL) return;
+    fetch(HOTEL_API_BASE_URL + '/api/auth/csrf-token', { credentials: 'include' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) { if (data.success) gaCsrfToken = data.csrfToken; })
+      .catch(function() { /* admin actions requiring CSRF will fail with a clear error if this didn't load */ });
+  }
+
+  document.getElementById('password-input').addEventListener('keydown', function(e) {
+    if (e.key === 'Enter') gaTryLogin();
+  });
+
+  function gaLogout() {
+    fetch(HOTEL_API_BASE_URL + '/api/auth/logout', { method: 'POST', credentials: 'include' }).catch(function() {});
+    gaCsrfToken = null;
+    document.getElementById('app').style.display = 'none';
+    document.getElementById('login-screen').style.display = 'flex';
+  }
+
+  function showApp() {
+    document.getElementById('login-screen').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    renderBookings();
+    loadContentForm();
+    nlLoadSubscribers();
+  }
+
+  // Check for an existing real session (httpOnly cookie — JS can't read it
+  // directly, so we ask the backend). No client-side "remembered login"
+  // flag of any kind.
+  if (HOTEL_API_BASE_URL) {
+    fetch(HOTEL_API_BASE_URL + '/api/auth/me', { credentials: 'include' })
+      .then(function(r) { return r.ok ? r.json() : null; })
+      .then(function(data) {
+        if (data && data.success) {
+          gaFetchCsrfToken();
+          showApp();
+        }
+      })
+      .catch(function() { /* not logged in / backend unreachable — stay on login screen */ });
+  }
+
+  function gaSwitchTab(tab) {
+    document.querySelectorAll('.tab-btn').forEach(function(b) { b.classList.toggle('active', b.dataset.tab === tab); });
+    document.querySelectorAll('.panel').forEach(function(p) { p.classList.remove('active'); });
+    document.getElementById('panel-' + tab).classList.add('active');
+  }
+
+  function renderBookings() {
+    if (!HOTEL_API_BASE_URL) {
+      document.getElementById('bookings-list').innerHTML = '<div class="empty-state">Backend not configured — see server/README.md.</div>';
+      return;
+    }
+    fetch(HOTEL_API_BASE_URL + '/api/bookings', { credentials: 'include' })
+      .then(function(r) {
+        if (r.status === 401 || r.status === 403) throw new Error('Not authorized. Please sign in again.');
+        return r.json();
+      })
+      .then(function(data) {
+        if (!data.success) throw new Error(data.error || 'Could not load bookings.');
+        nlBookingsCache = data.bookings;
+        renderBookingsList(data.bookings);
+      })
+      .catch(function(err) {
+        document.getElementById('bookings-list').innerHTML = '<div class="empty-state">' + escapeHtml(err.message || 'Could not load bookings.') + '</div>';
+      });
+  }
+
+  var nlBookingsCache = [];
+
+  function renderBookingsList(bookings) {
+    document.getElementById('bookings-count').textContent = bookings.length;
+    var container = document.getElementById('bookings-list');
+    if (bookings.length === 0) {
+      container.innerHTML = '<div class="empty-state">No reservation requests yet. New submissions from the website booking form will show up here.</div>';
+      return;
+    }
+    container.innerHTML = bookings.map(function(b) {
+      var statusClass = b.status === 'confirmed' ? 'status-confirmed' : 'status-new';
+      var submitted = new Date(b.created_at);
+      return (
+        '<div class="booking-card">' +
+          '<div>' +
+            '<div class="name">' + escapeHtml(b.customer_name || 'Unnamed guest') + ' <span class="status-pill ' + statusClass + '">' + escapeHtml(b.status) + '</span></div>' +
+            '<div class="meta">Ref ' + escapeHtml(b.booking_reference) + ' · Submitted ' + submitted.toLocaleString() + '</div>' +
+            '<div class="details">' +
+              '<div><span class="label">Email</span>' + escapeHtml(b.customer_email || '—') + '</div>' +
+              '<div><span class="label">Phone</span>' + escapeHtml(b.customer_phone || '—') + '</div>' +
+              '<div><span class="label">Room</span>' + escapeHtml(b.room_name || '—') + '</div>' +
+              '<div><span class="label">Guests</span>' + escapeHtml(b.guests || '—') + '</div>' +
+              '<div><span class="label">Check-in</span>' + escapeHtml(b.check_in || '—') + '</div>' +
+              '<div><span class="label">Check-out</span>' + escapeHtml(b.check_out || '—') + '</div>' +
+              '<div><span class="label">Total</span>' + escapeHtml('$' + (b.total_amount_cents / 100).toFixed(2) + ' ' + b.currency) + '</div>' +
+              '<div><span class="label">Payment</span>' + escapeHtml(b.payment_status) + '</div>' +
+            '</div>' +
+          '</div>' +
+          '<div class="booking-actions">' +
+            (b.status === 'confirmed' ? '' : '<button class="confirm" onclick="gaSetStatus(\'' + b.id + '\', \'confirmed\')">Mark confirmed</button>') +
+            (b.status === 'cancelled' ? '' : '<button class="delete" onclick="gaCancelBooking(\'' + b.id + '\')">Cancel booking</button>') +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function gaSetStatus(id, status) {
+    fetch(HOTEL_API_BASE_URL + '/api/bookings/' + id, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': gaCsrfToken },
+      credentials: 'include',
+      body: JSON.stringify({ status: status })
+    })
+      .then(function(r) { if (!r.ok) throw new Error('Update failed'); })
+      .then(function() { renderBookings(); })
+      .catch(function() { alert('Could not update booking. Please try again.'); });
+  }
+
+  function gaCancelBooking(id) {
+    if (!confirm('Cancel this reservation?')) return;
+    fetch(HOTEL_API_BASE_URL + '/api/bookings/' + id + '/cancel', {
+      method: 'POST',
+      headers: { 'X-CSRF-Token': gaCsrfToken },
+      credentials: 'include'
+    })
+      .then(function(r) { if (!r.ok) throw new Error('Cancel failed'); })
+      .then(function() { renderBookings(); })
+      .catch(function() { alert('Could not cancel booking. Please try again.'); });
+  }
+
+  function escapeHtml(str) {
+    var div = document.createElement('div');
+    div.textContent = str == null ? '' : String(str);
+    return div.innerHTML;
+  }
+
+  var nlRoomsCache = {};
+
+  function loadContentForm() {
+    if (!HOTEL_API_BASE_URL) {
+      document.querySelectorAll('#panel-content input, #panel-content textarea').forEach(function(el) { el.disabled = true; });
+      return;
+    }
+
+    Promise.all([
+      fetch(HOTEL_API_BASE_URL + '/api/settings', { credentials: 'include' }).then(function(r) { return r.json(); }),
+      fetch(HOTEL_API_BASE_URL + '/api/rooms', { credentials: 'include' }).then(function(r) { return r.json(); })
+    ])
+      .then(function(results) {
+        var settingsData = results[0];
+        var roomsData = results[1];
+
+        if (settingsData.success && settingsData.settings) {
+          document.getElementById('f-phone').value = settingsData.settings.phone || '';
+          document.getElementById('f-address').value = settingsData.settings.address || '';
+        }
+
+        if (roomsData.success && Array.isArray(roomsData.rooms)) {
+          roomsData.rooms.forEach(function(r) { nlRoomsCache[r.room_type] = r; });
+          var deluxe = nlRoomsCache.deluxe_room;
+          var presidential = nlRoomsCache.presidential_suite;
+          if (deluxe) {
+            document.getElementById('f-deluxe-title').value = deluxe.name || '';
+            document.getElementById('f-deluxe-price').value = (deluxe.price_cents / 100).toFixed(0);
+            document.getElementById('f-deluxe-desc').value = deluxe.description || '';
+          }
+          if (presidential) {
+            document.getElementById('f-presidential-title').value = presidential.name || '';
+            document.getElementById('f-presidential-price').value = (presidential.price_cents / 100).toFixed(0);
+            document.getElementById('f-presidential-desc').value = presidential.description || '';
+          }
+        }
+      })
+      .catch(function() {
+        var msg = document.getElementById('save-msg');
+        msg.textContent = 'Could not load current content from the server.';
+        msg.style.color = '#b3452f';
+        msg.classList.add('show');
+      });
+  }
+
+  function gaSaveContent() {
+    if (!HOTEL_API_BASE_URL) {
+      alert('Backend not configured — see server/README.md.');
+      return;
+    }
+
+    var settingsUpdate = {
+      phone: document.getElementById('f-phone').value.trim(),
+      address: document.getElementById('f-address').value.trim()
+    };
+
+    var requests = [
+      fetch(HOTEL_API_BASE_URL + '/api/settings', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': gaCsrfToken },
+        credentials: 'include',
+        body: JSON.stringify(settingsUpdate)
+      })
+    ];
+
+    if (nlRoomsCache.deluxe_room) {
+      requests.push(fetch(HOTEL_API_BASE_URL + '/api/rooms/' + nlRoomsCache.deluxe_room.id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': gaCsrfToken },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: document.getElementById('f-deluxe-title').value.trim(),
+          price_cents: Math.round(parseFloat(document.getElementById('f-deluxe-price').value) * 100),
+          description: document.getElementById('f-deluxe-desc').value.trim()
+        })
+      }));
+    }
+    if (nlRoomsCache.presidential_suite) {
+      requests.push(fetch(HOTEL_API_BASE_URL + '/api/rooms/' + nlRoomsCache.presidential_suite.id, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json', 'X-CSRF-Token': gaCsrfToken },
+        credentials: 'include',
+        body: JSON.stringify({
+          name: document.getElementById('f-presidential-title').value.trim(),
+          price_cents: Math.round(parseFloat(document.getElementById('f-presidential-price').value) * 100),
+          description: document.getElementById('f-presidential-desc').value.trim()
+        })
+      }));
+    }
+
+    var msg = document.getElementById('save-msg');
+    Promise.all(requests)
+      .then(function(responses) {
+        var allOk = responses.every(function(r) { return r.ok; });
+        if (!allOk) throw new Error('One or more updates failed.');
+        msg.textContent = 'Saved to the database.';
+        msg.style.color = '';
+        msg.classList.add('show');
+        setTimeout(function() { msg.classList.remove('show'); }, 2500);
+      })
+      .catch(function() {
+        msg.textContent = 'Could not save — please try again.';
+        msg.style.color = '#b3452f';
+        msg.classList.add('show');
+      });
+  }
+
+  // ============================================================
+  // Newsletter Subscribers — talks to the real backend API.
+  // No subscriber data is ever stored in localStorage here; this
+  // only caches the API base URL + admin token for convenience
+  // (sessionStorage, cleared when the browser tab closes).
+  // ============================================================
+  var nlSubscribersCache = [];
+
+  function nlLoadSubscribers() {
+    if (!HOTEL_API_BASE_URL) {
+      document.getElementById('newsletter-list').innerHTML = '<div class="empty-state">Backend not configured — see server/README.md.</div>';
+      return;
+    }
+    fetch(HOTEL_API_BASE_URL + '/api/newsletter/subscribers', { credentials: 'include' })
+      .then(function(r) {
+        if (r.status === 401 || r.status === 403) throw new Error('Not authorized. Please sign in again.');
+        return r.json();
+      })
+      .then(function(data) {
+        if (!data.success) throw new Error(data.error || 'Could not load subscribers.');
+        nlRenderSubscribers(data.subscribers || []);
+      })
+      .catch(function(err) {
+        document.getElementById('newsletter-list').innerHTML = '<div class="empty-state">' + escapeHtml(err.message || 'Could not load subscribers.') + '</div>';
+      });
+  }
+
+  function nlRenderSubscribers(list) {
+    nlSubscribersCache = list;
+    document.getElementById('newsletter-count').textContent = list.length;
+    var container = document.getElementById('newsletter-list');
+    if (list.length === 0) {
+      container.innerHTML = '<div class="empty-state">No subscribers yet.</div>';
+      return;
+    }
+    container.innerHTML = list.map(function(s) {
+      var date = new Date(s.subscribed_at).toLocaleString();
+      return (
+        '<div class="booking-card">' +
+          '<div>' +
+            '<div class="name">' + escapeHtml(s.email) + ' <span class="status-pill ' + (s.status === 'active' ? 'status-confirmed' : 'status-new') + '">' + escapeHtml(s.status) + '</span></div>' +
+            '<div class="meta">Subscribed ' + date + '</div>' +
+          '</div>' +
+          '<div class="booking-actions">' +
+            '<button class="delete" onclick="gaDeleteSubscriber(\'' + s.id + '\')">Delete</button>' +
+          '</div>' +
+        '</div>'
+      );
+    }).join('');
+  }
+
+  function gaSearchSubscribers(query) {
+    if (!HOTEL_API_BASE_URL) return;
+    fetch(HOTEL_API_BASE_URL + '/api/newsletter/subscribers?search=' + encodeURIComponent(query), { credentials: 'include' })
+      .then(function(r) { return r.json(); })
+      .then(function(data) { nlRenderSubscribers(data.subscribers || []); })
+      .catch(function() { /* leave current list visible on transient errors */ });
+  }
+
+  function gaDeleteSubscriber(id) {
+    if (!confirm('Delete this subscriber?')) return;
+    fetch(HOTEL_API_BASE_URL + '/api/newsletter/subscribers/' + id, {
+      method: 'DELETE',
+      headers: { 'X-CSRF-Token': gaCsrfToken },
+      credentials: 'include'
+    })
+      .then(function(r) { if (!r.ok) throw new Error('Delete failed'); })
+      .then(function() { gaSearchSubscribers(document.getElementById('nl-search').value); })
+      .catch(function() { alert('Could not delete subscriber. Please try again.'); });
+  }
+
+  function gaExportSubscribersCsv() {
+    if (!HOTEL_API_BASE_URL) return;
+    fetch(HOTEL_API_BASE_URL + '/api/newsletter/subscribers/export', { credentials: 'include' })
+      .then(function(r) {
+        if (!r.ok) throw new Error('Export failed');
+        return r.blob();
+      })
+      .then(function(blob) {
+        var link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = 'newsletter-subscribers.csv';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      })
+      .catch(function() { alert('Could not export subscribers. Please try again.'); });
+  }
+</script>
+</body>
+</html>
